@@ -1,215 +1,48 @@
-**Docker Commands**
+# Docker Lab
 
-**Basic commands and getting help**
+Docker Lab is the containerization track here. It starts with the mechanics of images and containers, then moves into Dockerfiles, Compose-driven multi-service environments, persistence, networking, and a small Podman branch for contrast.
 
-sudo usermod -aG docker \<username> = add user to docker group
+## Project layout
 
-docker \--version
+The area is organized around a few practical projects rather than one single application:
 
-docker info
+- `project1/` focuses on image building, base images, and command execution behavior
+- `project2/` is the most substantial exercise: a Dockerized Django application that grows from a single container into a Compose stack with PostgreSQL, custom networking, and persistent storage
+- `project3/` shifts toward Podman-oriented deployment work
+- `project-extra-jenkins-as-docker-container/` captures the separate thread of running Jenkins as a containerized service
 
-docker help
+The older command notes and screenshots still exist in the history of this area, but the real value here is the progression from isolated container commands into a small multi-service application environment.
 
-docker command \--help (ex: docker container \--help)
+## Technical focus
 
-docker search IMAGE
+The Docker material covers the pieces that tend to matter first in real usage:
 
-docker search IMAGE \--filter is-official=true
+- image creation with `Dockerfile`
+- container lifecycle and process model
+- port publishing and runtime inspection
+- multi-service orchestration with Compose
+- service discovery and bridge networking
+- persistent database volumes
+- application plus database bootstrapping
+- containerizing operational tooling such as Jenkins
 
-docker image pull IMAGE:tag = download image
+`project2/` is especially useful because it turns container concepts into a real application shape: Django app, environment variables, PostgreSQL, Compose startup order, network isolation, and state persistence.
 
-docker image ls = list all local images
+## Local workflow
 
-**Container Commands**
+Work from the specific project you want to run.
 
-docker container run \[OPTIONS\] IMAGE \[COMMAND\] \[ARG\...\] = run a
-container from an image
+Typical commands in this area are:
 
-Useful options:
+```bash
+docker build -t image-name .
+docker compose up -d
+docker compose down
+docker exec -it <container> sh
+```
 
--a, \--attach list: Attach to STDIN, STDOUT or STDERR
+The exact commands vary by project, but the structure of the area makes it easy to move from image-level basics into a more realistic application stack.
 
--d, \--detach: Run container in background and print container ID
+## Why it matters
 
-e, \--env list: Set environment variables
-
--i, \--interactive: Keep STDIN open even if not attached
-
-\--name string: Assign a name to the container
-
--t, \--tty: Allocate a pseudo-TTY (terminal)
-
-docker container create IMAGE = create a container from an image
-
-docker container start CONTAINER = start the container (flag -a to see
-the output)
-
-docker container stop CONTAINER = stop the container
-
-docker container kill CONTAINER = kill the container (not used ideally)
-
-**!!! When you have a container that already have been created you can't
-replace the default command**
-
-Example:
-
-docker run busybox echo hi there
-
-output: hi there
-
-docker start -a busybox
-
-output: hi there
-
-**Executing commands in running containers:**
-
-docker container exec \[OPTIONS\] CONTAINER COMMAND \[ARG\...\]
-
-**Run a shell in a running container**
-
-docker container exec -it CONTAINER COMMAND
-
--i, \--interactive: Keep STDIN open even if not attached
-
--t, \--tty: Allocate a pseudo-TTY (terminal)
-
-docker container exec -it CONTAINER sh = get a shell in a running
-container
-
-docker container exec -it CONTAINER /bin/bash = get a bash in a running
-container
-
-tip: CTRL+D or exit to exit
-
-**Starting with a shell**
-
-docker run -it CONTAINER sh
-
-Downside: you won't be able to run any other process
-
-It\'s a little bit more common that you\'re going to want to start up
-your container with a primary process (like Web server) and then use
-docker exec to run a shell.
-
-**Example:**
-
-Getting Bash Access to a CentOS Container
-
-docker container run --name=container1 -it centos = getting shell
-access as root in centos container (bash is the default command)
-
-CTRL+P+Q -- exit from a container without stopping it
-
-docker container exec -it container1 bash = returning to shell in the
-container
-
-**Listing Containers**
-
-docker container ls = list all running containers
-
-docker container ls -a = list all containers
-
-docker container ls -a -f status=exited = list all exited containers
-
-docker container ls -aq = list only the ids
-
-**Removing containers and images**
-
-docker container rm CONTAINER = remove the container if it is stopped
-
-docker container rm -f CONTAINER = force remove the container
-
-docker container rm \$(docker container ls -a -f status=exited -q) =
-delete all exited containers
-
-docker image rm IMAGE = remove an image (you must stop the containers
-and remove the containers before removing the image)
-
-docker image rm -f IMAGE = force remove the image
-
-docker system prune = remove all stopped containers, all networks not
-used by at least one container, all dangling images, all dangling build
-cache
-
-docker system prune -a = remove all stopped containers, all networks not
-used by at least one container, all images without at least one
-container associated to them, all dangling build cache
-
-**Getting Information about the Running Containers:**
-
-docker container stats \[OPTIONS\] CONTAINER
-
-docker container inspect \[OPTIONS\] CONTAINER
-
-docker image inspect \[OPTIONS\] IMAGE
-
-**Container Port Mapping**
-
-docker container run -p host port:container port IMAGE
-
--p, \--publish list: Publish a container\'s port(s) to the host
-
-![](./media/media/image1.png)
-
-Obs: Ports don't need to be identical
-
-**Docker Network**
-
-![](./media/media/image2.png)
-
-This way is not recommended. It is recommended to use docker-compose
-
-**Building Custom Image using Dockerfile:
-<https://docs.docker.com/engine/reference/builder/>**
-
-![](./media/media/image3.png)
-
-**Creating Custom Images using Dockerfile**
-
-docker image build \[OPTIONS\] PATH \| URL \| -
-
-docker image build -t image_name:tag destination_path
-
-new_image format: username_or_repository/new_image_name:tag
-
-**Committing Container Changes into a New Image: Create a new image from
-a container\'s changes**
-
-docker commit \[OPTIONS\] CONTAINER \[REPOSITORY\[:TAG\]\]
-
-**Tagging and Pushing Custom Images to Docker Hub**
-
-docker image tag existing_image new_image:custom_tag
-
-docker login
-
-docker image push new_image
-
-**For Debbuging:**
-
-docker logs \[OPTIONS\] CONTAINER
-
-for a container that is running: docker container exec \[OPTIONS\]
-CONTAINER COMMAND \[ARG\...\]
-
-docker container exec -it CONTAINER /bin/bash
-
-docker container inspect \[OPTIONS\] CONTAINER
-
-**Docker Compose**
-
-docker-compose -h\\--help
-
-![](./media/media/image4.png)
-
-docker-compose up
-
-docker-compose down
-
-**Volumes**
-
-![](./media/media/image5.png)
-
-Volumes in action: The previous content is still there
-
-![](./media/media/image6.png)
+Docker Lab is valuable because it turns container ideas into platform instincts. It is where packaging, process boundaries, ports, networks, and data persistence stop being abstract platform terms and start becoming concrete operational behavior.
